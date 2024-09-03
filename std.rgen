@@ -1,0 +1,9 @@
+letters :: "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m" | "n" | "o" | "p" | "q" | "r" | "s" | "t" | "u" | "v" | "w" | "x" | "y" | "z"
+
+vowels :: "a" | "e" | "i" | "o" | "u" | "y"
+cons :: "b" | "c" | "d" | "f" | "g" | "h" | "j" | "k" | "l" | "m" | "n" | "p" | "q" | "r" | "s" | "t" | "v" | "w" | "x" | "z" 
+
+two :: (generate @cons) . (generate @vowels)
+three :: ((generate @cons) . (generate @vowels)) . (generate @cons)
+
+word :: (generate @two) | (generate @three) | (generate @word) . (generate @word)

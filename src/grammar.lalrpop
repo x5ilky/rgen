@@ -1,0 +1,44 @@
+use std::str::FromStr;
+use crate::ast::{Expr};
+
+grammar;
+
+pub Stmt: Expr = { Definition, Display, Generate }; 
+Value = { Definition, Generate, Expr }
+ExprRoot = { Option, "(" <Value> ")", "@" <n:Name> => Expr::Ref(n) };
+Expr = {
+    ExprRoot,
+    <r:Expr> "^" <i:Number> => Expr::Weighted {value: Box::new(r), weight: i},
+    <r:ExprRoot> "." <rr:ExprRoot> => Expr::Join { left: Box::new(r), right: Box::new(rr) }
+}
+
+Definition: Expr = {
+    <n:Name> "::" <c:Choices> => Expr::Define {
+        name: n,
+        options: Box::new(c)
+    }
+}
+Generate: Expr = {
+    "generate" <n:Expr> => Expr::Generate ( Box::new(n) )
+}
+Display: Expr = {
+    "display" <n:Expr> => Expr::Display (Box::new(n))
+}
+Option: Expr = {
+    <s:String> => Expr::String(s)
+}
+Choices: Expr = { <b:Bar<Expr>> => Expr::List(b) };
+
+Bar<T>: Vec<T> = {
+    <mut v:(<T> "|")*> <e:T?> => match e { // (2)
+        None => v,
+        Some(e) => {
+            v.push(e);
+            v
+        }
+    }
+}
+
+Number: u32 = <s:r"[0-9]+"> => u32::from_str_radix(s, 10).unwrap();
+Name: String = <s:r"[a-zA-Z_$][a-zA-Z_$0-9]*"> => s.to_string();
+String: String = <s:r#"\"(\\.|[^"\\])*\""#> => { let mut p = s.chars(); p.next(); p.next_back(); p.as_str().to_string() };

@@ -1,0 +1,12 @@
+[package]
+name = "rgen"
+version = "0.1.0"
+edition = "2021"
+
+[build-dependencies]
+lalrpop = "0.21.0"
+
+[dependencies]
+lalrpop-util = { version = "0.21.0", features = ["lexer", "unicode"] }
+rand = "0.8.5"
+text_io = "0.1.12"
